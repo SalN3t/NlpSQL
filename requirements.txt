@@ -1,0 +1,5 @@
+re
+tkinter
+ScrolledText
+MySQLdb
+nltk

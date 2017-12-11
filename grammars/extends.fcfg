@@ -1,0 +1,247 @@
+## Natural Language Toolkit: sql.fcfg
+##
+## Deliberately naive string-based grammar for 
+## deriving SQL queries from English
+## 
+## Author: Salah Alarfaj <sarfaj01@gmail.com> 
+## URL: <http://nltk.sourceforge.net>
+## License: MIT
+
+% start S
+
+S[SEM=(?np2 + ?vp2)] -> NP[SEM=?np2] VP[SEM=?vp2]
+
+VP[SEM=(?vp2 + BREAK_W + WHERE + ?pp)] -> Sal_v[SEM=?vp2] PP[SEM=?pp]
+VP[SEM=?vp2] -> V[SEM=?vp2]  | Sal_v[SEM=?vp2] | Dep_v[SEM=?vp2] 
+VP[SEM=(?v + ?vp)] -> V[SEM=?v] VP[SEM=?vp]
+VP[SEM=(?v + BREAK_W + WHERE + ?n + ?vp)] -> Dep_v[SEM=?v] N[SEM=?n] VP[SEM=?vp]
+
+# Last and first name handler
+VP[SEM=(?v + BREAK_W + WHERE + ?la +?na1 + ?na2)] -> V[SEM=?v] last_a[SEM=?la] name_a[SEM=?na1] name_b[SEM=?na2]
+VP[SEM=(?v +  BREAK_W + WHERE + ?la +?na1 + ?na2)] -> V[SEM=?v] first_a[SEM=?la] name_a[SEM=?na1] name_b[SEM=?na2]
+
+VP[SEM=(?paid_v + ?v)] -> Paid_v[SEM=?paid_v] V[SEM=?v] 
+VP[SEM=(?paid_v  + ?v1 +  BREAK_W + WHERE + ?n + ?v2)] -> Paid_v[SEM=?paid_v]  V[SEM=?v1] N[SEM=?n] V[SEM=?v2]
+
+VP[SEM=(?iv + ?v)] -> IV[SEM=?iv] V[SEM=?v]
+
+PP[SEM=(?n + ?v)] -> N[SEM=?n] V[SEM=?v]
+
+# Handling Average
+NP[SEM=(?det + ?avg)] -> Det[SEM=?det] AVG[SEM=?avg] | Det[SEM=?det] Max[SEM=?avg] | Det[SEM=?det] Min[SEM=?avg] | Det[SEM=?det] Con_t[SEM=?avg] 
+
+NP[SEM=(?det)] -> Det_2[SEM=?det]
+
+# SELECT Clause
+Det[SEM='BREAK_S SELECT'] -> 'Which' | 'What' | 'How' | 'Who' | 'which' | 'what' | 'how' | 'who'
+Det_2[SEM='BREAK_S SELECT *'] -> 'Which' | 'What' | 'How' | 'Who'| 'Who' | 'which' | 'what' | 'how' | 'who'
+
+# Columns name clauses
+V[SEM='BREAK_F FROM salaries'] ->  'salary' | 'salaries'
+V[SEM='BREAK_F FROM titles'] ->  'title' | 'titles'
+V[SEM='BREAK_F FROM employees'] ->  'employee' | 'employees' | 'person'
+V[SEM='BREAK_F FROM departments, dept_emp'] ->  'department' | 'departments'
+
+# avg,min,max select variable
+Sal_v[SEM='(salary)  BREAK_F FROM salaries'] -> 'salary' | 'salaries'
+Dep_v[SEM='(employees.emp_no), dept_emp.dept_no BREAK_F FROM employees'] -> 'employee' | 'employees' | 'person'
+Paid_v[SEM='(salary) first_name, last_name, employees.emp_no BREAK_F FROM salaries BREAK_W where employees.emp_no = salaries.emp_no'] -> 'paid'
+
+# WHERE Clause
+N[SEM='departments.dept_name = "development" and dept_emp.dept_no = departments.dept_no   and dept_emp.emp_no = TMP_1.emp_no'] -> 'development'
+
+N[SEM='departments.dept_name = "dept_emp.emp_no = employees.emp_no and departments.dept_name = "development"'] -> 'development'
+
+N[SEM=' employees.emp_no = salaries.emp_no and departments.dept_no = dept_emp.dept_no and dept_emp.emp_no = salaries.emp_no and departments.dept_name= "development"'] -> 'development'
+
+# Average , Min, Max, Count
+AVG[SEM='AVG'] -> 'average' | 'avg'
+Max[SEM='MAX'] -> 'maximum' | 'max' | 'highest'
+Min[SEM='MIN'] -> 'minimum' | 'min' | 'lowest'
+Con_t[SEM='COUNT'] -> 'many' | 'much'
+
+# Helpers
+last_a[SEM='last_name'] -> 'last'
+name_a[SEM=''] -> 'name'
+name_b[SEM='= "Guana"'] -> 'Guana'
+name_b[SEM='= "Facello"'] -> 'Facello'
+first_a[SEM='first_name'] -> 'first'
+
+################################################################################################################
+#						Comments
+################################################################################################################
+## MySQL 
+## Note: Nested Queries are not supported
+
+
+## Base Form
+# SELECT (Columns names)* FROM (Table names)*
+
+## WHERE Form
+# SELECT (Columns names)* FROM (Table names)* [WHERE [Conditions] ]
+
+## Average Form
+# SELECT AVG( (Column name) )(Columns names)* FROM (Table names)*
+# SELECT AVG( (Column name) )(Columns names)* FROM (Table names)* [WHERE [Conditions] ] ...
+
+
+## GROUP By Forms
+# SELECT (Columns names)* FROM (Table names)* [WHERE [Conditions] ] [GROUP BY (Colmns name)]
+# SELECT (Columns names)* FROM (Table names)* [GROUP BY (Colmns name)]
+
+## ORDER BY Forms
+# SELECT (Columns names)* FROM (Table names)* [WHERE [Conditions] ] [ORDER BY (Colmns name) (ASC/DESC)]
+# SELECT (Columns names)* FROM (Table names)* [WHERE [Conditions] ] [GROUP BY (Colmns name)] [ORDER BY (Colmns name) (ASC/DESC)]
+
+# SELECT (Columns names)* FROM (Table names)* [WHERE [Conditions] ] [GROUP BY (Colmns name)] [ORDER BY (Colmns name) (ASC/DESC)]
+
+###############################
+### Conditions
+
+# Col_name (> , =>, <, <=, =) value
+# Col_name (> , =>, <, <=, =) value (AND/OR) Col_name (> , =>, <, <=, =) value
+
+#  Col_name LIKE value
+
+#  Col_name IN (value, value, ...)
+
+################################################################################################################
+#						Test Data
+################################################################################################################
+
+# n_words['between', 'not', 'do']
+# stop_word
+
+# # Salary qeustions
+# What is the average salary?
+# ['What', 'average', 'salary', '?']
+
+# What is the average salary in development departments?
+# ['What', 'average', 'salary', 'development', 'deparments', '?'
+
+# What is the salary in acending order? 
+# ['What', 'salary', 'acending', 'order', '?']
+
+# What is the salary in development deparments in decsinding order?
+# ['What', ''salary', 'development', 'deparments', 'decsinding', 'order', '?']
+
+# What is the (maximum/minimum, max/min) salary being paid [in department][using accending/decsinding order]?
+# What is the maximum salary being paid ?
+# ['What', 'maximum', 'salary', 'paid', '?']
+
+# What is the max salary?
+# ['What', 'max', 'salary', 'paid', '?']
+
+# What is the minimum salary?
+# ['What', 'minimum', 'salary', 'paid', '?']
+
+
+# What is the min salary being paid ?
+# ['What', 'min', 'salary', 'paid', '?']
+
+
+# (Skip) what is the highest average salary between departments? (SELECT MAX(avg_sal), dept_no , dept_name  FROM (SELECT AVG(salary) as avg_sal, dept_emp.dept_no  , departments.dept_name FROM salaries, dept_emp, departments where salaries.emp_no = dept_emp.emp_no group by departments.dept_no) as table1)
+# ['what', 'highest', 'average', 'salary', 'between', 'departments', '?']
+
+# ------------
+# # Departments questions
+
+# (Skip) Which departmnets has the most employees?
+# ['Which', 'departmnets', 'most', 'employees', '?']
+
+# (skip) Which departmnets does not have the most employees?
+# ['Which', 'departmnets', 'not', 'most', 'employees', '?']
+
+# (skip) Which departments has most paying salaries?
+# ['Which', 'departments', 'most', 'paying', 'salaries', '?']
+
+# (skip) Which departments has least paying salaries?
+# ['Which', 'departments', 'least', 'paying', 'salaries', '?']
+
+# How many employees in development department?
+# (SELECT COUNT(employees.emp_no), dept_name  FROM employees, dept_emp, departments WHERE dept_emp.emp_no = employees.emp_no and departments.dept_name = 'development')
+# ['How', 'many', 'employees', 'development', 'department', '?']
+
+# ------------
+# # employees questions
+# Who is the highest paid employee?
+# ['Who', 'highest', 'paid', 'employee', '?']
+# (SELECT MAX(salary), first_name, last_name, employees.emp_no FROM salaries, employees where employees.emp_no = salaries.emp_no)
+
+# Who is the highest paid employee in Engeering deparment?
+# ['Who', 'highest', 'paid', 'employee', 'Engeering', 'deparment', '?']
+# SELECT MAX(salary), first_name, last_name, employees.emp_no, dept_name FROM salaries, employees, departments, dept_emp where employees.emp_no = salaries.emp_no and departments.dept_no = dept_emp.dept_no and dept_emp.emp_no = salaries.emp_no and departments.dept_name= "development"
+
+# Who is the highest paid person?
+# ['Who', 'highest', 'paid', 'person', '?'
+
+# Who is the highest paid person in Engeering deparment?
+# ['Who', 'highest', 'paid', 'person', 'Engeering', 'deparment', '?']
+
+# (Skip) Which employee has last name ending in stu?
+# ['Which', 'employee', 'last', 'name', 'ending', 'stu', '?']
+
+# Which employee has last name Guana?
+# ['Which', 'employee', 'last', 'name', 'Guana', '?']
+# select * from employees where last_name='Facello'
+
+
+# Which employee has first name Guana?
+# ['Which', 'employee', 'last', 'name', 'Guana', '?']
+# select * from employees where first_name='Rimon'
+
+# Which employee has fisrt name starting in stu?
+# ['Which', 'employee', 'fisrt', 'name', 'starting', 'stu', '?']
+
+
+# Which employee has id number 1001?
+# ['Which', 'employee', 'id', 'number', '1001', '?']
+
+
+# what is the first and last name of an employee with id number 1001?
+# ['what', 'first', 'last', 'name', 'employee', 'id', 'number', '1001']
+
+# Which department does John Du works at(under)?
+# ['Which', 'department', 'John', 'Du', 'works', '(', ')', '?']
+
+# How much does John Du make?
+# ['How', 'much', 'John', 'Du', 'make', '?']
+
+
+# What is John Du title?
+# ['What', 'John', 'Du', 'title', '?']
+
+# What does John du do?
+# ['What', 'John', 'du', 'do', '?']
+
+# Which employee has CEO title?
+# ['Which', 'employee', 'CEO', 'title', '?']
+
+
+# How many employee has staff title?
+# ['How', 'many', 'employee', 'staff', 'title', '?']
+
+
+
+# ------------ Type of Q:
+# 	- Qantitive
+# 	- Singulartive
+# 	- Avergeing
+# 	- Max/Min
+
+
+# ------------ SQL operations supported
+# 	- SELECT
+# 	- FROM
+# 	- WHERE
+# 	- AVG
+# 	- ORDER BY ASC/DESC		(Skip)
+# 	- LIKE				(Skip)
+# 	- IN				(Skip)
+# 	- operations(> , < , = )	(Skip)
+
+
+
+
+################################################################################################################
+

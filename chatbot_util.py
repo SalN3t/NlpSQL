@@ -140,12 +140,14 @@ class Chat(object):
         elif user_input:
                 while user_input[-1] in "!.": user_input = user_input[:-1]
                 response = self.respond(user_input)
-                self.textPad.insert(INSERT, "\nYou > "+user_input+"\nChatbot > " + str(response) + "\n")
+                self.textPad.insert(END, "\nYou > "+user_input+"\nChatbot > " + str(response) + "\n")
                 self.textPad.see(END)
                 self.entry.delete(0, 'end')
                 response = ''
                 user_input = ''
-
+        if response != None:
+            response = ''
+            user_input = ''
        
     def converse(self, quit="quit"):
         self.root = Tk(className=" NLP To SQL (QA)")

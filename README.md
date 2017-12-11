@@ -9,8 +9,7 @@ The database engin used in this project is `MySQL <https://www.mysql.com/>`
 License
 -------
 
-NlpSQL is free software, released under the `[MIT]
-(https://opensource.org/licenses/MIT)`.
+NlpSQL is free software, released under the [MIT](https://opensource.org/licenses/MIT).
 
 
 Requirements
@@ -19,8 +18,8 @@ You will need some Python packages
 
 To install dependencies (on a Debian-like GNU/Linux distribution):
 
-    git clone #project_url#
-    cd #project_directory#
+    git clone https://github.com/SalN3t/NlpSQL.git
+    cd NlpSQL
     pip install requirements.txt
 
 
@@ -34,7 +33,7 @@ You will also need MySQL database. You can do so if you don't have it by:
     apt-get install mysql
 
 Now you would need to create the databse schema provided. 
-A good tutorial `[Create a MySQL Database on Linux via Command Line](https://www.liquidweb.com/kb/create-a-mysql-database-on-linux-via-command-line/)`
+A good tutorial [Create a MySQL Database on Linux via Command Line](https://www.liquidweb.com/kb/create-a-mysql-database-on-linux-via-command-line/)
 
 Please make sure to name the database `employees`
 Ok, Now we will need to papulate the data:
@@ -63,3 +62,9 @@ Make sure you fulfill the requirements First.
 To run:
 
     python main.py
+
+
+YouTube Demo
+----------
+
+[![Demo](https://img.youtube.com/watch?v=fhZZ90gTh4s/0.jpg)](https://youtu.be/fhZZ90gTh4s)
